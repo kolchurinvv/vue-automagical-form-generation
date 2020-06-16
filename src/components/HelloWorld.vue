@@ -1,130 +1,73 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br />
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener"
-        >vue-cli documentation</a
-      >.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel"
-          target="_blank"
-          rel="noopener"
-          >babel</a
+  <div>
+    <div>data: info = {{ info }}</div>
+    <hr />
+    <child
+      v-for="item in info"
+      :key="Object.keys(item).toString()"
+      @user-input="update"
+      v-model="values"
+      :item="item"
+    >
+      <ul v-if="selectionsVisible[Object.keys(item).toString()]">
+        <li
+          @click="clicked($event)"
+          v-for="line in selections[Object.keys(item).toString()]"
+          :key="line.index"
+          :for="Object.keys(item).toString()"
         >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router"
-          target="_blank"
-          rel="noopener"
-          >router</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-vuex"
-          target="_blank"
-          rel="noopener"
-          >vuex</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint"
-          target="_blank"
-          rel="noopener"
-          >eslint</a
-        >
-      </li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li>
-        <a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a>
-      </li>
-      <li>
-        <a href="https://forum.vuejs.org" target="_blank" rel="noopener"
-          >Forum</a
-        >
-      </li>
-      <li>
-        <a href="https://chat.vuejs.org" target="_blank" rel="noopener"
-          >Community Chat</a
-        >
-      </li>
-      <li>
-        <a href="https://twitter.com/vuejs" target="_blank" rel="noopener"
-          >Twitter</a
-        >
-      </li>
-      <li>
-        <a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a>
-      </li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li>
-        <a href="https://router.vuejs.org" target="_blank" rel="noopener"
-          >vue-router</a
-        >
-      </li>
-      <li>
-        <a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-devtools#vue-devtools"
-          target="_blank"
-          rel="noopener"
-          >vue-devtools</a
-        >
-      </li>
-      <li>
-        <a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener"
-          >vue-loader</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-          rel="noopener"
-          >awesome-vue</a
-        >
-      </li>
-    </ul>
+          {{ line }} for input of "{{ values[Object.keys(item).toString()] }}"
+        </li>
+      </ul>
+      <hr />
+    </child>
   </div>
 </template>
 
 <script>
+import Child from "@/views/child.vue";
 export default {
   name: "HelloWorld",
-  props: {
-    msg: String
+  components: {
+    Child
+  },
+  methods: {
+    update(info) {
+      if (!info.target.value) {
+        setTimeout(() => {
+          this.selectionsVisible[info.target.id] = false;
+        }, 1000);
+      }
+      let input = { [info.target.id]: info.target.value };
+      this.values = { ...this.values, ...input };
+      this.selectionsVisible[info.target.id] = true;
+      this.$emit("updated");
+    },
+    clicked(val) {
+      let selection = {
+        [val.target.attributes.getNamedItem("for").value]:
+          val.target.textContent.trim() + " was clicked"
+      };
+      this.selectionsVisible[
+        val.target.attributes.getNamedItem("for").value
+      ] = false;
+      this.values = { ...this.values, ...selection };
+      this.$emit("clicked", this.values);
+    }
+  },
+  data() {
+    return {
+      info: [{ firstID: "orginal info #1" }, { secondID: "original info #2" }],
+      selectionsVisible: { firstID: false, secondID: false },
+      values: {},
+      selections: {
+        firstID: ["firstID #1 option", "firstID #2 option"],
+        secondID: ["secondID #1 option", "secondID #2 option"]
+      }
+    };
   }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
+<style scoped lang="scss"></style>
